@@ -1,72 +1,66 @@
-// Google 이미지 검색 요청
-async function searchImages() {
-  const query = document.getElementById('imageSearchQuery').value.trim();
-  const resultsContainer = document.getElementById('imageSearchResults');
-  
-  if (!query) {
-    alert('검색어를 입력해 주세요.');
-    return;
-  }
-  
-  resultsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">이미지를 검색 중입니다...</p>';
+// 교사 로그인
+function handleTeacherLogin(event) {
+    event.preventDefault();
+    const id = document.getElementById('teacherId').value;
+    const pw = document.getElementById('teacherPw').value;
 
-  try {
-    const response = await fetch(`/api/search-images?q=${encodeURIComponent(query)}`);
-    const data = await response.json();
-
-    resultsContainer.innerHTML = '';
-
-    if (!data.items || data.items.length === 0) {
-      resultsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">검색 결과가 없습니다.</p>';
-      return;
-    }
-
-    // 검색된 이미지 목록 출력
-    data.items.forEach(item => {
-      const imgElem = document.createElement('img');
-      imgElem.src = item.link;
-      imgElem.alt = item.title || '검색 이미지';
-      imgElem.style.width = '100%';
-      imgElem.style.height = '120px';
-      imgElem.style.objectFit = 'cover';
-      imgElem.style.cursor = 'pointer';
-      imgElem.style.borderRadius = '6px';
-      
-      // 이미지 클릭 시 게시물 작성 폼으로 전달
-      imgElem.onclick = () => selectImage(item.link);
-      resultsContainer.appendChild(imgElem);
+    fetch('/api/teacher/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, pw })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/board';
+        } else {
+            alert(data.message);
+        }
     });
-  } catch (error) {
-    console.error('이미지 검색 오류:', error);
-    resultsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">검색 중 오류가 발생했습니다.</p>';
-  }
+    return false;
 }
 
-// 선택한 이미지 적용
-function selectImage(imageUrl) {
-  // hidden input에 선택한 이미지 URL 저장
-  document.getElementById('postImageUrl').value = imageUrl;
-  
-  // 미리보기 이미지 업데이트
-  const previewImg = document.getElementById('imagePreview');
-  const previewContainer = document.getElementById('imagePreviewContainer');
-  
-  if (previewImg && previewContainer) {
-    previewImg.src = imageUrl;
-    previewContainer.style.display = 'block';
-  }
+// 학생 입장
+function handleStudentLogin(event) {
+    event.preventDefault();
+    const code = document.getElementById('entryCode').value;
+    const name = document.getElementById('studentName').value;
 
-  closeImageModal();
+    fetch('/api/student/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, name })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/board';
+        } else {
+            alert('입장 코드가 올바르지 않습니다.');
+        }
+    });
+    return false;
 }
 
-// 모달 열기/닫기
-function openImageModal() {
-  document.getElementById('imageSearchModal').style.display = 'block';
-  document.getElementById('imageSearchQuery').focus();
-}
+// 교사 회원가입
+function handleTeacherRegister(event) {
+    event.preventDefault();
+    const id = document.getElementById('regTeacherId').value;
+    const pw = document.getElementById('regTeacherPw').value;
+    const name = document.getElementById('regTeacherName').value;
 
-function closeImageModal() {
-  document.getElementById('imageSearchModal').style.display = 'none';
-  document.getElementById('imageSearchResults').innerHTML = '';
-  document.getElementById('imageSearchQuery').value = '';
+    fetch('/api/teacher/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, pw, name })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            const teacherTab = new bootstrap.Tab(document.getElementById('teacher-tab'));
+            teacherTab.show();
+        }
+    });
+    return false;
 }
