@@ -1,14 +1,9 @@
 import os
-import time
 import json
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect
 
 app = Flask(__name__)
 app.secret_key = 'mypadlet_secret_key_123'
-
-UPLOAD_FOLDER = os.path.join('static', 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 DATA_FILE = 'teachers.json'
 
@@ -29,43 +24,41 @@ def save_teachers(data):
 def index():
     return render_template('index.html')
 
-# 교사 회원가입 API
+@app.route('/board')
+def board():
+    return render_template('board.html')
+
 @app.route('/api/teacher/register', methods=['POST'])
 def register_teacher():
     data = request.json
-    t_id = data.get('id')
-    t_pw = data.get('pw')
-    t_name = data.get('name')
-    
+    t_id, t_pw, t_name = data.get('id'), data.get('pw'), data.get('name')
     teachers = load_teachers()
+    
     if t_id in teachers:
         return jsonify({'success': False, 'message': '이미 존재하는 아이디입니다.'})
         
     teachers[t_id] = {'pw': t_pw, 'name': t_name}
     save_teachers(teachers)
-    return jsonify({'success': True, 'message': '교사 회원가입이 완료되었습니다! 로그인해 주세요.'})
+    return jsonify({'success': True, 'message': '회원가입이 완료되었습니다.'})
 
-# 사진/파일 업로드 API (서버 직접 저장으로 404 방지)
-@app.route('/upload', methods=['POST'])
-def upload_files():
-    files = request.files.getlist('files')
-    uploaded_urls = []
-    uploaded_files = []
+@app.route('/api/teacher/login', methods=['POST'])
+def login_teacher():
+    data = request.json
+    t_id, t_pw = data.get('id'), data.get('pw')
+    teachers = load_teachers()
     
-    for file in files:
-        if file and file.filename != '':
-            ext = os.path.splitext(file.filename)[1]
-            if not ext: ext = '.png'
-            
-            save_name = f"{int(time.time() * 1000)}_{os.urandom(4).hex()}{ext}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], save_name)
-            file.save(filepath)
-            
-            url = f"/static/uploads/{save_name}"
-            uploaded_urls.append(url)
-            uploaded_files.append({"url": url, "name": file.filename})
-            
-    return jsonify({'urls': uploaded_urls, 'files': uploaded_files})
+    if t_id in teachers and teachers[t_id]['pw'] == t_pw:
+        session['user_type'] = 'teacher'
+        session['user_name'] = teachers[t_id]['name']
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'})
+
+@app.route('/api/student/login', methods=['POST'])
+def login_student():
+    data = request.json
+    session['user_type'] = 'student'
+    session['user_name'] = data.get('name')
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
