@@ -4,34 +4,27 @@ import json
 import io
 from flask import Flask, render_template, request, jsonify
 
-# 구글 드라이브 연동 라이브러리
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 
 app = Flask(__name__)
 
-# ================= 구글 드라이브 설정 =================
-# 구글 드라이브 폴더 ID
 FOLDER_ID = '1capKURBOv5TpP0DgNvagP8VQYfnLlBtl'
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 def get_drive_service():
     try:
-        # 클라우드 서버의 '비밀 환경변수'에서 키를 읽어옵니다.
         creds_json = os.environ.get('GDRIVE_CREDENTIALS')
         if creds_json:
             creds_dict = json.loads(creds_json)
             creds = service_account.Credentials.from_service_account_info(
                 creds_dict, scopes=SCOPES)
             return build('drive', 'v3', credentials=creds)
-        else:
-            print("환경변수에 구글 드라이브 인증 정보가 없습니다.")
-            return None
+        return None
     except Exception as e:
         print("구글 드라이브 인증 오류:", e)
         return None
-# ====================================================
 
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -74,7 +67,7 @@ def upload_files():
             save_name = f"{int(time.time() * 1000)}_{os.urandom(4).hex()}{ext}"
             saved_to_drive = False
 
-            # 1. 구글 드라이브 업로드 시도
+            # 구글 드라이브 업로드 시도
             if drive_service:
                 try:
                     file_stream = io.BytesIO(file.read())
@@ -99,9 +92,9 @@ def upload_files():
                 except Exception as e:
                     print("구글 드라이브 업로드 실패, 로컬 폴더로 대체 저장합니다:", e)
 
-            # 2. 구글 드라이브 미설정 또는 업로드 실패 시 로컬 static/uploads에 저장
+            # 구글 드라이브 연동 실패 시 안전한 로컬 저장 (404 방지)
             if not saved_to_drive:
-                file.seek(0)  # 스트림 포인터 초기화
+                file.seek(0)
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], save_name)
                 file.save(filepath)
                 url = f"/static/uploads/{save_name}"
