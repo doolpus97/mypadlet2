@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify, session
 
 app = Flask(__name__)
 app.secret_key = 'mypadlet_secret_key_123'
@@ -23,10 +23,6 @@ def save_teachers(data):
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/board')
-def board():
-    return render_template('board.html')
 
 @app.route('/api/teacher/register', methods=['POST'])
 def register_teacher():
@@ -53,15 +49,16 @@ def login_teacher():
     if t_id in teachers and teachers[t_id]['pw'] == t_pw:
         session['user_type'] = 'teacher'
         session['user_name'] = teachers[t_id]['name']
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'name': teachers[t_id]['name'], 'role': 'teacher'})
     return jsonify({'success': False, 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'})
 
 @app.route('/api/student/login', methods=['POST'])
 def login_student():
     data = request.json
+    s_name = data.get('name')
     session['user_type'] = 'student'
-    session['user_name'] = data.get('name')
-    return jsonify({'success': True})
+    session['user_name'] = s_name
+    return jsonify({'success': True, 'name': s_name, 'role': 'student'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
