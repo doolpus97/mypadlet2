@@ -1,0 +1,67 @@
+[
+    {
+        "id": 1,
+        "title": "나의 장래 희망 소개",
+        "room_code": "9704",
+        "teacher": "doolpus",
+        "sections": [
+            "섹션 1",
+            "섹션 2",
+            "섹션 3",
+            "섹션 4",
+            "섹션 5",
+            "섹션 6"
+        ],
+        "posts": [
+            {
+                "id": 1,
+                "title": "의사",
+                "content": "의사가 되고 싶어",
+                "author": "홍길수",
+                "author_raw": "홍길수",
+                "author_role": "student",
+                "section": "섹션 1",
+                "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlPVnULsiRx8YrFOIrVCStHKbU7vHOvpOH5syYErIJWQ&s=10",
+                "link_url": "",
+                "comments": [
+                    {
+                        "author": "김둘리",
+                        "content": "잘했어요."
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "title": "의사",
+                "content": "의사가 될래요.",
+                "author": "홍길수",
+                "author_raw": "홍길수",
+                "author_role": "student",
+                "section": "섹션 1",
+                "image_url": "/uploads/2026-08-22_131014.png",
+                "link_url": "",
+                "comments": []
+            },
+            {
+                "id": 3,
+                "title": "소방관이 되고 싶어요.",
+                "content": "저는 소방관이 될 거에요.",
+                "author": "김둘리",
+                "author_raw": "김둘리",
+                "author_role": "student",
+                "section": "섹션 1",
+                "image_urls": [
+                    "/uploads/2026-08-22_111124.png",
+                    "/uploads/2026-08-22_120138.png",
+                    "/uploads/2026-08-22_125440.png",
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpnZMkqHWpgnGC8rXU2owqBlhnW4f_pBtU30HsvuXeug&s=10",
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2h89jy-YnxNqtxgr81UnsyhKNsRubVOzoy6P3VnHJnA&s",
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPSUhNaX0TBgxC4OLunwPdSFc8tGAPwPUt4oEWDq9VAw&s=10"
+                ],
+                "image_url": "/uploads/2026-08-22_111124.png",
+                "link_url": "",
+                "comments": []
+            }
+        ]
+    }
+]
