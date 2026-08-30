@@ -31,7 +31,9 @@ def board():
 @app.route('/api/teacher/register', methods=['POST'])
 def register_teacher():
     data = request.json
-    t_id, t_pw, t_name = data.get('id'), data.get('pw'), data.get('name')
+    t_id = data.get('id')
+    t_pw = data.get('pw')
+    t_name = data.get('name')
     teachers = load_teachers()
     
     if t_id in teachers:
@@ -44,7 +46,8 @@ def register_teacher():
 @app.route('/api/teacher/login', methods=['POST'])
 def login_teacher():
     data = request.json
-    t_id, t_pw = data.get('id'), data.get('pw')
+    t_id = data.get('id')
+    t_pw = data.get('pw')
     teachers = load_teachers()
     
     if t_id in teachers and teachers[t_id]['pw'] == t_pw:
