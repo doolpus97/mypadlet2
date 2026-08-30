@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session
 
 app = Flask(__name__)
 app.secret_key = 'mypadlet_secret_key_123'
@@ -23,14 +23,6 @@ def save_teachers(data):
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/board')
-def board():
-    try:
-        return render_template('board.html')
-    except Exception:
-        # board.html이 없을 경우 index.html로 안전하게 리다이렉트
-        return redirect(url_for('index'))
 
 @app.route('/api/teacher/register', methods=['POST'])
 def register_teacher():
