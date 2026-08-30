@@ -12,7 +12,7 @@ function handleTeacherLogin(event) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/board';
+            showBoard(data.name, '교사');
         } else {
             alert(data.message);
         }
@@ -23,20 +23,17 @@ function handleTeacherLogin(event) {
 // 학생 입장
 function handleStudentLogin(event) {
     event.preventDefault();
-    const code = document.getElementById('entryCode').value;
     const name = document.getElementById('studentName').value;
 
     fetch('/api/student/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, name })
+        body: JSON.stringify({ name })
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/board';
-        } else {
-            alert('입장 코드가 올바르지 않습니다.');
+            showBoard(data.name, '학생');
         }
     });
     return false;
@@ -63,4 +60,11 @@ function handleTeacherRegister(event) {
         }
     });
     return false;
+}
+
+// 로그인 성공 시 화면 전환 함수
+function showBoard(userName, userRole) {
+    document.getElementById('loginSection').classList.add('d-none');
+    document.getElementById('boardSection').classList.remove('d-none');
+    document.getElementById('userInfo').innerText = `${userName} (${userRole})`;
 }
