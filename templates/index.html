@@ -1,64 +1,98 @@
-import os
-import json
-from flask import Flask, render_template, request, jsonify, session, redirect
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리반 학급 게시판</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light min-vh-100 d-flex align-items-center justify-content-center p-3">
 
-app = Flask(__name__)
-app.secret_key = 'mypadlet_secret_key_123'
+    <!-- 1. 로그인 영역 -->
+    <div id="loginSection" class="card shadow border-0 w-100" style="max-width: 420px; border-radius: 16px;">
+        <div class="card-body p-4 text-center">
+            <h3 class="fw-bold mb-3">우리반 학급 게시판</h3>
 
-DATA_FILE = 'teachers.json'
+            <ul class="nav nav-tabs nav-justified mb-3" id="loginTab">
+                <li class="nav-item">
+                    <button class="nav-link active fw-bold" id="student-tab" data-bs-toggle="tab" data-bs-target="#student">학생 입장</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="teacher-tab" data-bs-toggle="tab" data-bs-target="#teacher">교사 로그인</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold text-primary" id="register-tab" data-bs-toggle="tab" data-bs-target="#register">교사 가입</button>
+                </li>
+            </ul>
 
-def load_teachers():
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {}
+            <div class="tab-content text-start" id="loginTabContent">
+                <!-- 학생 입장 -->
+                <div class="tab-pane fade show active" id="student">
+                    <form onsubmit="return handleStudentLogin(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">4자리 입장 코드</label>
+                            <input type="text" id="entryCode" class="form-control text-center" placeholder="••••" maxlength="4" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">학생 이름</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="홍길동" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">게시판 입장하기</button>
+                    </form>
+                </div>
 
-def save_teachers(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+                <!-- 교사 로그인 -->
+                <div class="tab-pane fade" id="teacher">
+                    <form onsubmit="return handleTeacherLogin(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">교사 아이디</label>
+                            <input type="text" id="teacherId" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">비밀번호</label>
+                            <input type="password" id="teacherPw" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 fw-bold">교사 로그인</button>
+                    </form>
+                </div>
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+                <!-- 교사 회원가입 -->
+                <div class="tab-pane fade" id="register">
+                    <form onsubmit="return handleTeacherRegister(event)">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">아이디</label>
+                            <input type="text" id="regTeacherId" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">비밀번호</label>
+                            <input type="password" id="regTeacherPw" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">이름</label>
+                            <input type="text" id="regTeacherName" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">회원가입 완료</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-@app.route('/board')
-def board():
-    return render_template('board.html')
+    <!-- 2. 게시판 영역 (초기 상태 숨김) -->
+    <div id="boardSection" class="container bg-white p-4 rounded shadow-sm d-none" style="max-width: 800px;">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <h3 class="fw-bold m-0">📌 우리반 게시판</h3>
+            <div>
+                <span id="userInfo" class="badge bg-secondary me-2 p-2"></span>
+                <button onclick="location.reload()" class="btn btn-outline-danger btn-sm">로그아웃</button>
+            </div>
+        </div>
+        <div class="alert alert-success">
+            게시판에 성공적으로 입장하셨습니다!
+        </div>
+    </div>
 
-@app.route('/api/teacher/register', methods=['POST'])
-def register_teacher():
-    data = request.json
-    t_id, t_pw, t_name = data.get('id'), data.get('pw'), data.get('name')
-    teachers = load_teachers()
-    
-    if t_id in teachers:
-        return jsonify({'success': False, 'message': '이미 존재하는 아이디입니다.'})
-        
-    teachers[t_id] = {'pw': t_pw, 'name': t_name}
-    save_teachers(teachers)
-    return jsonify({'success': True, 'message': '회원가입이 완료되었습니다.'})
-
-@app.route('/api/teacher/login', methods=['POST'])
-def login_teacher():
-    data = request.json
-    t_id, t_pw = data.get('id'), data.get('pw')
-    teachers = load_teachers()
-    
-    if t_id in teachers and teachers[t_id]['pw'] == t_pw:
-        session['user_type'] = 'teacher'
-        session['user_name'] = teachers[t_id]['name']
-        return jsonify({'success': True})
-    return jsonify({'success': False, 'message': '아이디 또는 비밀번호가 일치하지 않습니다.'})
-
-@app.route('/api/student/login', methods=['POST'])
-def login_student():
-    data = request.json
-    session['user_type'] = 'student'
-    session['user_name'] = data.get('name')
-    return jsonify({'success': True})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
